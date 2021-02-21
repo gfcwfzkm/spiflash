@@ -1,7 +1,7 @@
 /*
  * spiflash.h
- * Einfacher SPI-Flash Treiber für den W25Q512JV
- * Created: 25.01.2021 13:43:42
+ * Einfacher SPI-Flash Treiber fÃ¼r den W25Q512JV
+ * Created: 25.01.2021 13:43:42 
  *  Author: gfcwfzkm
  */ 
 

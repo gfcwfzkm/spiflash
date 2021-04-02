@@ -8,11 +8,11 @@
 #include "spiflash.h"
 
 void flash_configInterface(flash_t *flash,
-				void *ioInterface, uint8_t (*startTransaction)(void*),
-				uint8_t (*sendBytes)(void*,uint8_t,const uint8_t*,uint32_t),
-				uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint32_t),
-				uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint32_t),
-				uint8_t (*endTransaction)(void*))
+    	void *ioInterface, uint8_t (*startTransaction)(void*),
+	    uint8_t (*sendBytes)(void*,uint8_t,const uint8_t*,uint32_t),
+	    uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint32_t),
+	    uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint32_t),
+	    uint8_t (*endTransaction)(void*))
 {
 	flash->error = FLASH_NOERROR;
 	flash->ioInterface = ioInterface;
@@ -24,7 +24,7 @@ void flash_configInterface(flash_t *flash,
 }
 
 enum FLASH_ERROR flash_init(flash_t *flash, uint32_t capacity,
-				uint8_t manufacturerID)
+        uint8_t manufacturerID)
 {
 	uint8_t readBuf[5];
 	

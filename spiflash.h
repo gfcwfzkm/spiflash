@@ -9,6 +9,7 @@
 #ifndef SPIFLASH_H_
 #define SPIFLASH_H_
 
+#include "gd32vf103.h"
 #include <inttypes.h>
 
 /* This delay function needs to be provided by the user!
@@ -88,24 +89,24 @@ typedef struct
 	uint8_t (*startTransaction)(void*);	// Prepare the IO/Peripheral Interface for a transaction
 	uint8_t (*sendBytes)(void*,			// Send data function pointer: InterfacePointer,
 						uint8_t,		// Address of the PortExpander (8-Bit Address Format!),
-						const uint8_t*,	// Pointer to send buffer,
-						uint32_t);		// Amount of bytes to send
+						uint8_t*,		// Pointer to send buffer,
+						uint16_t);		// Amount of bytes to send
 	uint8_t (*transceiveBytes)(void*,	// Send and receive Bytes from the buffer (SPI only)
 						uint8_t,		// (8-Bit Address Format!) (ignored if zero),
 						uint8_t*,		// Pointer to send buffer,
-						uint32_t);		// Amount of bytes to send
+						uint16_t);		// Amount of bytes to send
 	uint8_t (*getBytes)(void*,			// Get data function pointer:InterfacePointer,
 						uint8_t,		// Address of the PortExpander (8-Bit Address Format!),
 						uint8_t*,		// Pointer to receive buffer,
-						uint32_t);		// Amount of bytes to receive
+						uint16_t);		// Amount of bytes to receive
 	uint8_t (*endTransaction)(void*);	// Finish the transaction / Release IO/Peripheral
 } flash_t;
 
 void flash_configInterface(flash_t *flash,
 							void *ioInterface, uint8_t (*startTransaction)(void*),
-							uint8_t (*sendBytes)(void*,uint8_t,const uint8_t*,uint32_t),
-							uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint32_t),
-							uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint32_t),
+							uint8_t (*sendBytes)(void*,uint8_t,uint8_t*,uint16_t),
+							uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint16_t),
+							uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint16_t),
 							uint8_t (*endTransaction)(void*));
 
 void flash_configMemory(flash_t *flash, uint32_t capacity, 
@@ -121,7 +122,7 @@ enum FLASH_ERROR flash_readCMD(flash_t *flash, uint8_t command,
 							uint8_t *dataBuf, uint8_t length);
 
 enum FLASH_ERROR flash_writeCMD(flash_t *flash, uint8_t command,
-							uint8_t const *dataBuf, uint8_t length);
+							uint8_t *dataBuf, uint8_t length);
 
 enum FLASH_ERROR flash_eraseCMD(flash_t *flash, uint8_t command,
 							uint32_t addr);
@@ -131,7 +132,7 @@ enum FLASH_ERROR flash_readMemory(flash_t *flash, uint32_t addr,
 
 /* Only 256 Bytes can be written per Page! Use flash_writeBuffer to write more*/
 enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr,
-							uint8_t const *dataBuf, uint32_t length);
+							uint8_t *dataBuf, uint32_t length);
 
 void flash_addrToBuf(uint8_t *addrBuf, uint32_t addr);
 //------------ BASIC ACCESS -------------------------------------------------------------
@@ -144,7 +145,7 @@ enum FLASH_ERROR flash_writeEnable(flash_t *flash);
 enum FLASH_ERROR flash_writeDisable(flash_t *flash);
 uint32_t flash_getJEDECID(flash_t *flash);
 enum FLASH_ERROR flash_readBuffer(flash_t *flash, uint32_t addr, uint8_t *dataBuf, uint32_t length);
-uint32_t flash_writeBuffer(flash_t *flash, uint32_t addr, uint8_t const *dataBuf, uint32_t length);
+uint32_t flash_writeBuffer(flash_t *flash, uint32_t addr, uint8_t *dataBuf, uint32_t length);
 enum  FLASH_ERROR flash_eraseSector(flash_t *flash, uint32_t sectorNum);
 enum  FLASH_ERROR flash_eraseBlock(flash_t *flash, uint32_t blockNum);
 enum  FLASH_ERROR flash_eraseChip(flash_t *flash);

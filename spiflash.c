@@ -9,9 +9,9 @@
 
 void flash_configInterface(flash_t *flash,
     	void *ioInterface, uint8_t (*startTransaction)(void*),
-	    uint8_t (*sendBytes)(void*,uint8_t,const uint8_t*,uint32_t),
-	    uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint32_t),
-	    uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint32_t),
+	    uint8_t (*sendBytes)(void*,uint8_t,uint8_t*,uint16_t),
+	    uint8_t (*transceiveBytes)(void*,uint8_t,uint8_t*,uint16_t),
+	    uint8_t (*getBytes)(void*,uint8_t,uint8_t*,uint16_t),
 	    uint8_t (*endTransaction)(void*))
 {
 	flash->error = FLASH_NOERROR;
@@ -29,20 +29,20 @@ enum FLASH_ERROR flash_init(flash_t *flash, uint32_t capacity,
 	uint8_t readBuf[5];
 	
 	flash->total_size = capacity;
-		
+	
 	/* Testing if flash can be accessed by reading the Manufacturer/Device ID */
 	flash_readCMD(flash, FLASH_R_MAN_DEV_ID, readBuf, 5);
-	
-	if ((flash->error == FLASH_NOERROR) && ((readBuf[2] != 0) || 
-		(readBuf[3] != manufacturerID)))
+
+	/* Lets store the read IDs regardless of the success, so the user can decide */
+	flash->MF_ID = readBuf[3];
+	flash->DEV_ID = readBuf[4];
+
+	if ((flash->error == FLASH_NOERROR) && (readBuf[3] != manufacturerID))
 	{
 		flash->error = FLASH_IDERROR;
 	}
-	else
-	{
-		flash->MF_ID = readBuf[3];
-		flash->DEV_ID = readBuf[4];
-		
+	else if (flash->error == FLASH_NOERROR)
+	{		
 		while(flash_readStatus1(flash) & FLASH_R_STATUS_1_BUSY){}
 		
 		flash_execCMD(flash, FLASH_R_ENABLE_RESET);
@@ -77,6 +77,7 @@ enum FLASH_ERROR flash_readCMD(flash_t *flash, uint8_t command, uint8_t *dataBuf
 	flash->startTransaction(flash->ioInterface);
 	
 	flash->sendBytes(flash->ioInterface, 0, &command, 1);
+	
 	flash->getBytes(flash->ioInterface, 0, dataBuf, length);
 	
 	flash->endTransaction(flash->ioInterface);
@@ -84,7 +85,7 @@ enum FLASH_ERROR flash_readCMD(flash_t *flash, uint8_t command, uint8_t *dataBuf
 	return flash->error;
 }
 
-enum FLASH_ERROR flash_writeCMD(flash_t *flash, uint8_t command, uint8_t const *dataBuf, uint8_t length)
+enum FLASH_ERROR flash_writeCMD(flash_t *flash, uint8_t command, uint8_t *dataBuf, uint8_t length)
 {
 	flash->error = FLASH_NOERROR;
 	
@@ -133,7 +134,7 @@ enum FLASH_ERROR flash_readMemory(flash_t *flash, uint32_t addr, uint8_t *dataBu
 	return flash->error;
 }
 
-enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr, uint8_t const *dataBuf, uint32_t length)
+enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr, uint8_t *dataBuf, uint32_t length)
 {
 	uint8_t command_address[5];
 	flash->error = FLASH_NOERROR;
@@ -226,7 +227,7 @@ enum FLASH_ERROR flash_readBuffer(flash_t *flash, uint32_t addr, uint8_t *dataBu
 	return flash->error;
 }
 
-uint32_t flash_writeBuffer(flash_t *flash, uint32_t addr, uint8_t const *dataBuf, uint32_t length)
+uint32_t flash_writeBuffer(flash_t *flash, uint32_t addr, uint8_t *dataBuf, uint32_t length)
 {
 	uint32_t RemainsToWrite = length;
 	uint32_t leftOnPage;

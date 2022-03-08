@@ -48,7 +48,7 @@ enum FLASH_ERROR flash_init(flash_t *flash, uint32_t capacity,
 		flash_execCMD(flash, FLASH_R_ENABLE_RESET);
 		flash_execCMD(flash, FLASH_R_RESET_DEVICE);
 		
-		_delay_us(50);
+		FLASH_RESET_DELAY();
 		
 		flash_execCMD(flash, FLASH_R_ENTER_4B_ADDRMODE);
 		flash_writeDisable(flash);
@@ -102,8 +102,7 @@ enum FLASH_ERROR flash_eraseCMD(flash_t *flash, uint8_t command, uint32_t addr)
 	flash->error = FLASH_NOERROR;
 	
 	command_address[0] = command;
-	flash_addrToBuf(command_address + 1, addr);
-	
+	flash_addrToBuf(command_address + 1, addr);	
 	
 	flash->startTransaction(flash->ioInterface);
 	

@@ -1,6 +1,6 @@
 /*
  * spiflash.h
- * Einfacher SPI-Flash Treiber für den W25Q512JV
+ * Einfacher SPI-Flash Treiber für den W25Q512JV oder ähnliche ICs
  * Created: 25.01.2021 13:43:42 
  *  Author: gfcwfzkm
  */ 
@@ -9,8 +9,11 @@
 #ifndef SPIFLASH_H_
 #define SPIFLASH_H_
 
-#include <util/delay.h>
 #include <inttypes.h>
+
+/* This delay function needs to be provided by the user!
+ * A delay of at least 30us is needed, 50us recommended */
+#define FLASH_RESET_DELAY()	delay_us(50)
 
 #define FLASH_R_WRITE_ENABLE		0x06
 #define FLASH_R_VOL_WRITE_ENABLE	0x50
@@ -85,7 +88,7 @@ typedef struct
 	uint8_t (*startTransaction)(void*);	// Prepare the IO/Peripheral Interface for a transaction
 	uint8_t (*sendBytes)(void*,			// Send data function pointer: InterfacePointer,
 						uint8_t,		// Address of the PortExpander (8-Bit Address Format!),
-						const uint8_t*,		// Pointer to send buffer,
+						const uint8_t*,	// Pointer to send buffer,
 						uint32_t);		// Amount of bytes to send
 	uint8_t (*transceiveBytes)(void*,	// Send and receive Bytes from the buffer (SPI only)
 						uint8_t,		// (8-Bit Address Format!) (ignored if zero),

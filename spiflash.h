@@ -9,12 +9,16 @@
 #ifndef SPIFLASH_H_
 #define SPIFLASH_H_
 
-#include "gd32vf103.h"
 #include <inttypes.h>
 
 /* This delay function needs to be provided by the user!
  * A delay of at least 30us is needed, 50us recommended */
+#ifdef __AVR__
+#include <util/delay.h>
+#define FLASH_RESET_DELAY()	_delay_us(50)
+#else
 #define FLASH_RESET_DELAY()	delay_us(50)
+#endif
 
 #define FLASH_R_WRITE_ENABLE		0x06
 #define FLASH_R_VOL_WRITE_ENABLE	0x50

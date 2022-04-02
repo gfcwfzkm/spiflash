@@ -28,11 +28,15 @@
 #define FLASH_R_JEDEC_ID			0x9F
 #define FLASH_R_READ_UNIQUE_ID		0x4B
 #define FLASH_R_READ_DATA			0x03
-#define FLASH_R_READ_FAST_DATA		0x0C
+#define FLASH_R_READ_FAST_DATA		0x0B
+#define FLASH_R_READ_FAST_DATA_4B	0x0C
 #define FLASH_R_PAGE_PROGRAMM		0x02
+#define FLASH_R_PAGE_PROGRAMM_4B	0x12
 #define FLASH_R_ERASE_SECTOR		0x20
+#define FLASH_R_ERASE_SECTOR_4B		0x21
 #define FLASH_R_ERASE_HALF_BLOCK	0x52
 #define FLASH_R_ERASE_BLOCK			0xD8
+#define FLASH_R_ERASE_BLOCK_4B		0xDC
 #define FLASH_R_ERASE_CHIP			0xC7
 #define FLASH_R_READ_STATUS_1		0x05
 #define FLASH_R_READ_STATUS_2		0x35
@@ -138,7 +142,7 @@ enum FLASH_ERROR flash_readMemory(flash_t *flash, uint32_t addr,
 enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr,
 							uint8_t *dataBuf, uint32_t length);
 
-void flash_addrToBuf(uint8_t *addrBuf, uint32_t addr);
+void flash_addrToBuf(uint8_t *addrBuf, uint32_t addr, uint32_t totalSize);
 //------------ BASIC ACCESS -------------------------------------------------------------
 uint8_t flash_readStatus1(flash_t *flash);
 uint8_t flash_readStatus2(flash_t *flash);

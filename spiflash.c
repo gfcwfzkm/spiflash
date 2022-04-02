@@ -50,7 +50,8 @@ enum FLASH_ERROR flash_init(flash_t *flash, uint32_t capacity,
 		
 		FLASH_RESET_DELAY();
 		
-		flash_execCMD(flash, FLASH_R_ENTER_4B_ADDRMODE);
+		if (capacity > (1UL << 24UL))
+
 		flash_writeDisable(flash);
 		flash_waitUntilReady(flash);
 	}
@@ -103,11 +104,11 @@ enum FLASH_ERROR flash_eraseCMD(flash_t *flash, uint8_t command, uint32_t addr)
 	flash->error = FLASH_NOERROR;
 	
 	command_address[0] = command;
-	flash_addrToBuf(command_address + 1, addr);	
+	flash_addrToBuf(command_address + 1, addr, flash->total_size);	
 	
 	flash->startTransaction(flash->ioInterface);
 	
-	flash->sendBytes(flash->ioInterface, 0, command_address, 5);
+	flash->sendBytes(flash->ioInterface, 0, command_address, (flash->total_size > (1UL << 24UL)) ? 5 : 4);
 	
 	flash->endTransaction(flash->ioInterface);
 	
@@ -120,13 +121,13 @@ enum FLASH_ERROR flash_readMemory(flash_t *flash, uint32_t addr, uint8_t *dataBu
 	uint8_t command_address[6];
 	flash->error = FLASH_NOERROR;
 	
-	command_address[0] = FLASH_R_READ_FAST_DATA;
-	flash_addrToBuf(command_address + 1, addr);
+	command_address[0] = (flash->total_size > (1UL << 24UL)) ? FLASH_R_READ_FAST_DATA_4B : FLASH_R_READ_FAST_DATA;
+	flash_addrToBuf(command_address + 1, addr, flash->total_size);
 	command_address[5] = 0;	
 	
 	flash->startTransaction(flash->ioInterface);
 	
-	flash->sendBytes(flash->ioInterface, 0, command_address, 6);
+	flash->sendBytes(flash->ioInterface, 0, command_address, (flash->total_size > (1UL << 24UL)) ? 6 : 5);
 	flash->getBytes(flash->ioInterface, 0, dataBuf, length);
 	
 	flash->endTransaction(flash->ioInterface);
@@ -139,12 +140,12 @@ enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr, uint8_t *dataBuf
 	uint8_t command_address[5];
 	flash->error = FLASH_NOERROR;
 	
-	command_address[0] = FLASH_R_PAGE_PROGRAMM;
-	flash_addrToBuf(command_address + 1, addr);
+	command_address[0] = (flash->total_size > (1UL << 24UL)) ? FLASH_R_PAGE_PROGRAMM_4B : FLASH_R_PAGE_PROGRAMM;
+	flash_addrToBuf(command_address + 1, addr, flash->total_size);
 	
 	flash->startTransaction(flash->ioInterface);
 	
-	flash->sendBytes(flash->ioInterface, 0, command_address, 5);
+	flash->sendBytes(flash->ioInterface, 0, command_address, (flash->total_size > (1UL << 24UL)) ? 5 : 4);
 	flash->sendBytes(flash->ioInterface, 0, dataBuf, length);
 	
 	flash->endTransaction(flash->ioInterface);
@@ -152,12 +153,12 @@ enum FLASH_ERROR flash_writePage(flash_t *flash, uint32_t addr, uint8_t *dataBuf
 	return flash->error;
 }
 
-void flash_addrToBuf(uint8_t *addrBuf, uint32_t addr)
+void flash_addrToBuf(uint8_t *addrBuf, uint32_t addr, uint32_t totalSize)
 {
-	*addrBuf++ = (addr >> 24) & 0xFF;
+	if (totalSize > (1UL << 24UL))	*addrBuf++ = (addr >> 24) & 0xFF;
 	*addrBuf++ = (addr >> 16) & 0xFF;
 	*addrBuf++ = (addr >> 8) & 0xFF;
-	*addrBuf++ = addr & 0xFF;	
+	*addrBuf++ = addr & 0xFF;
 }
 
 uint8_t flash_readStatus1(flash_t *flash)
@@ -264,7 +265,7 @@ enum FLASH_ERROR flash_eraseSector(flash_t *flash, uint32_t sectorNum)
 	flash_waitUntilReady(flash);
 	flash_writeEnable(flash);
 	
-	flash_eraseCMD(flash, FLASH_R_ERASE_SECTOR, sectorNum * FLASH_C_SECTOR_SIZE);
+	flash_eraseCMD(flash, (flash->total_size > (1UL << 24UL)) ? FLASH_R_ERASE_SECTOR_4B : FLASH_R_ERASE_SECTOR, sectorNum * FLASH_C_SECTOR_SIZE);
 	
 	return flash->error;
 }
@@ -276,7 +277,7 @@ enum FLASH_ERROR flash_eraseBlock(flash_t *flash, uint32_t blockNum)
 	flash_waitUntilReady(flash);
 	flash_writeEnable(flash);
 	
-	flash_eraseCMD(flash, FLASH_R_ERASE_BLOCK, blockNum * FLASH_C_BLOCK_SIZE);
+	flash_eraseCMD(flash,  (flash->total_size > (1UL << 24UL)) ? FLASH_R_ERASE_BLOCK_4B : FLASH_R_ERASE_BLOCK, blockNum * FLASH_C_BLOCK_SIZE);
 	
 	return flash->error;
 }
